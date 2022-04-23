@@ -25,9 +25,9 @@ Data Sets:
 |type|true|Integer|1 for Ethereum and 2 for Polygon and 3 for Tezos|
 
 ##### <u>Type need to send and its meanings:</u> 
-1 - Ethereum
-2 - Polygon
-3 - Tezos
+1 - Ethereum   
+2 - Polygon   
+3 - Tezos   
 
 
 Example:
