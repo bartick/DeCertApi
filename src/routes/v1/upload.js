@@ -75,8 +75,9 @@ function checkBody(body) {
         err.status = 400;
         body.error = err;
         return body
-    } else {
-        if (typeof(body.recieversAddress) !== 'string' || body.recieversAddress.length !== 42 || !body.recieversAddress.startsWith('0x')) {
+    }
+    else {
+        if ((typeof(body.recieversAddress) !== 'string' || body.recieversAddress.length !== 42 || !body.recieversAddress.startsWith('0x')) && body.type !== 3) {
             let err = new Error('Invalid recieversAddress');
             err.status = 400;
             body.error = err;
@@ -102,10 +103,13 @@ function checkBody(body) {
         body.error = err;
         return body
     } else {
-        if (body.type==1) {
+        const typeCheck = body.type;
+        if(typeCheck === 1) {
             body.type = 'rinkeby';
-        } else if(body.type==2) {
+        } else if(typeCheck === 2) {
             body.type = 'mumbai';
+        } else if (typeCheck === 3) {
+            body.type = 'tezos';
         } else {
             let err = new Error('Invalid type');
             err.status = 400;

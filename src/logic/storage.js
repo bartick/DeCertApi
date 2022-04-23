@@ -1,6 +1,8 @@
 const { Web3Storage, File } = require('web3.storage');
 const { callContract } = require('./contactChain');
+const { mintNFT } = require('./tezos');
 const Certificates = require('./../schema/certificates');
+const TokenId = require('./../schema/tokenId');
 require('dotenv').config();
 
 // Created a unique uid for the file name.
@@ -53,8 +55,18 @@ async function uploadJson(client, rootCid, body, now, fileName){
     await Promise.all([
         client.put(files, {
             name: `Json ${now}`,
-            onRootCidReady: (rootCid) => {
-                callContract(rootCid, now, body.type, body.recieversAddress);
+            onRootCidReady: async(rootCid) => {
+                if(body.type==='rinkiby' || body.type==='mumbai'){
+                    callContract(rootCid, body.recieversAddress, body.type);
+                } else if(body.type==='tezos') {
+                    const token_id = await TokenId.findOneAndUpdate({'_id': process.env.TOKEN_NUMBER_ID }, {$inc: {tokenNumber: 1}})
+                    await mintNFT(body.recieversAddress, `ipfs://${rootCid}/${now}.json`, token_id.tokenNumber)
+                            .catch(console.log);
+                }
+                else {
+                    console.log('Unsuccesful');
+                    return;
+                }
             }
         }),
         saveCertifiate.save()
