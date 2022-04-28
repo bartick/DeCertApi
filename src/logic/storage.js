@@ -3,6 +3,7 @@ const { callContract } = require('./contactChain');
 const { mintNFT } = require('./tezos');
 const Certificates = require('./../schema/certificates');
 const TokenId = require('./../schema/tokenId');
+const axios = require('axios').default;
 require('dotenv').config();
 
 // Created a unique uid for the file name.
@@ -19,6 +20,25 @@ function uid() {
  */
 function makeStorageClient() {
     return new Web3Storage({ token: process.env.WEBSTORAGE });
+}
+
+/**
+ * 
+ * @param {string} recieversAddress 
+ * @param {string} fileName
+ *  
+ * @returns {Promise<void>}
+ * 
+ * @description Mints a token to the recievers address.
+ */
+async function completeTezosMinting(recieversAddress, fileName){
+    const response = await axios.get(
+        `https://api.hangzhounet.tzkt.io/v1/contracts/${process.env.CONTRACT_ADDRESS}/bigmaps/token_metadata/keys`
+      );
+    const data = response.data;
+    const token_id = parseInt(data[data.length - 1]["value"]["token_id"]) + 1;
+    await mintNFT(recieversAddress, fileName, token_id)
+            .catch(console.log);
 }
 
 /**
@@ -59,9 +79,8 @@ async function uploadJson(client, rootCid, body, now, fileName){
                 if(body.type==='rinkiby' || body.type==='mumbai'){
                     callContract(rootCid, body.recieversAddress, body.type);
                 } else if(body.type==='tezos') {
-                    const token_id = await TokenId.findOneAndUpdate({'_id': process.env.TOKEN_NUMBER_ID }, {$inc: {tokenNumber: 1}})
-                    await mintNFT(body.recieversAddress, `ipfs://${rootCid}/${now}.json`, token_id.tokenNumber)
-                            .catch(console.log);
+                    await completeTezosMinting(body.recieversAddress, `ipfs://${rootCid}/${now}.json`)
+                        .catch(console.log);
                 }
                 else {
                     console.log('Unsuccesful');
