@@ -76,8 +76,8 @@ async function uploadJson(client, rootCid, body, now, fileName){
         client.put(files, {
             name: `Json ${now}`,
             onRootCidReady: async(rootCid) => {
-                if(body.type==='rinkiby' || body.type==='mumbai'){
-                    callContract(rootCid, body.recieversAddress, body.type);
+                if(body.type==='rinkeby' || body.type==='mumbai'){
+                    callContract(rootCid, now, body.type, body.recieversAddress);
                 } else if(body.type==='tezos') {
                     await completeTezosMinting(body.recieversAddress, `ipfs://${rootCid}/${now}.json`)
                         .catch(console.log);
